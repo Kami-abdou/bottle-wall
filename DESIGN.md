@@ -12,29 +12,45 @@ by a TV. On the second-floor balcony, a frame of 512 plastic bottles glows and
 plays Snake. A sodium street lamp paints the pavement orange; someone in the
 street holds up a phone. Neighbourly and a bit mischievous, not a startup hero.
 
+## Direction (October 2026 restyle)
+
+Moved toward the look of wondermakers.games: near-black, one acid-lime accent,
+one geometric sans set very large, grain, tactile buttons. The aim is a page
+that feels made by hand rather than generated:
+
+- **Pixels only where real pixels exist.** The LED wall and its score are
+  pixels; nothing else on the page is. No dot-matrix type.
+- **One loud colour.** Lime is the LED colour and the only UI accent. Warm
+  sodium stays inside the street scene.
+- **Real bottles.** The wall shows bottle bottoms (the LEDs sit in the necks):
+  ribbed water bottles, five-footed soda bottles, the odd brown one, each a
+  little crooked, in a treated-wood frame with a cable taped down the facade.
+
 ## Palette
 
 | Token | Hex | Use |
 |---|---|---|
-| `--sky` | `#141a33` | night sky, hero background |
-| `--facade` | `#232845` | building wall |
-| `--facade-edge` | `#2b3152` | slabs, frames, balcony railings |
-| `--sodium` | `#f2a65a` | street light, window edges, focus ring on the wall, score digits |
-| `--snake` | `#7cf29a` | snake LEDs, "done" states in the plan |
-| `--food` | `#ff5a5f` | food LED, "verify" tags (as a thin outline, never a fill) |
-| `--bottle` | `#2c3354` | unlit plastic |
-| `--paper` | `#f6f5f0` | plan background, with a very faint 24 px grid |
-| `--ink` | `#1d2033` | plan text |
-| `--ink-soft` | `#585c72` | secondary text |
+| `--night` | `#000000` | wall background |
+| `--paper` | `#000000` | plan background (name kept from the paper version) |
+| `--panel` | `#0b0b0b` | section panels, 20 px radius, 8 px apart |
+| `--sky` | `#121212` | raised surfaces: counter cells, tags, flow nodes |
+| `--snake` | `#d4fb08` | LED lime: snake, buttons, accents, headline gradient |
+| `--snake-2` | `#8ef03a` | green end of the headline gradient |
+| `--food` | `#ff4d3d` | food LED, "verify" tags (thin outline, never a fill) |
+| `--sodium` | `#f2a65a` | street lamp, lit windows (scene only) |
+| `--ink` | `#f2f2ee` | plan text |
+| `--ink-soft` | `#9a9a96` | secondary text |
 
-The plan reuses the wall colours sparingly as "LED accents": green for
-progress, red outline for unverified claims, sodium for the current section.
+Big headlines use `--lime-text`, a lime → green → lime gradient clipped to
+the text. Text on lime is `--on-lime` (`#0a0a0a`).
 
 ## Type
 
-- **Doto** (Google Fonts, dot-matrix): hero title, section titles, numbers on
-  the counter and cost totals. It *is* the LED wall, in type.
-- **IBM Plex Sans Arabic**: all body text, so Derja / Arabic copy works later.
+- **Urbanist** (Google Fonts) for everything: headlines at weight 500 with
+  tight tracking (−0.045em) and 0.9 line height, body at 500. A free
+  stand-in for Codec Pro, the face Wonder Games uses.
+- **IBM Plex Sans Arabic** as the fallback, so Derja / Arabic copy still
+  renders properly.
 - Sentence case everywhere. No uppercase labels, no letter-spaced eyebrows.
 - Body line length capped at ~68ch.
 

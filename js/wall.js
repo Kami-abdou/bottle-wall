@@ -4,8 +4,11 @@
   Drawing strategy
   - The static scene (sky, building, street, unlit bottles) is drawn once per
     resize into an offscreen canvas.
+  - The bottles lie on their side with the LED pushed into the neck, so from
+    the street you see their bottoms: water bottles with a ribbed ring, soda
+    bottles with five feet. Each one sits a little crooked, like a real build.
   - Each frame blits that, then draws only the lit bottles from pre-rendered
-    sprites: an additive glow and a capsule body.
+    sprites: an additive glow and a lit bottle base.
   - Every bottle has a brightness that rises fast and decays slowly, so the
     snake leaves a short warm trail, like an LED behind cloudy plastic.
   - During the zoom transition the scene is drawn as vectors under a camera
@@ -20,25 +23,35 @@
   const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0]; // up, right, down, left
 
   // LED colours. Index 0 means "off".
-  const LED = [null, "#7cf29a", "#ff5a5f", "#ffe9c2", "#f2a65a", "#d8ffe3"];
+  const LED = [null, "#d4fb08", "#ff4d3d", "#fff4dc", "#f2a65a", "#f3ffb5"];
   const GREEN = 1, RED = 2, WHITE = 3, AMBER = 4, HEAD = 5;
 
-  const PAPER = "#f6f5f0";
+  const PAPER = "#000000"; // the plan's background: the bottle we dive into ends here
   const S = {
-    sky: "#141a33",
-    far: "#181f3b",
-    neighbour: "#1a2040",
-    facade: "#232845",
-    facadeShade: "#1f2441",
-    edge: "#2b3152",
-    edgeHi: "#363d63",
-    bottle: "#2c3354",
-    bottleEdge: "#333a64",
+    sky: "#05060a",
+    far: "#0b0c11",
+    neighbour: "#0e0f14",
+    facade: "#17181d",
+    facadeShade: "#121317",
+    edge: "#1f2026",
+    edgeHi: "#2b2d33",
     sodium: "#f2a65a",
-    pavement: "#1e2339",
-    road: "#161a2d",
-    silhouette: "#0b0e1d"
+    pavement: "#131417",
+    road: "#0a0b0d",
+    silhouette: "#030304",
+    backing: "#060708",
+    wood: "#3a2a1d",
+    woodDark: "#24190f"
   };
+
+  const TAU = Math.PI * 2;
+  // The bottles people actually bring: mostly water, some soda, the odd brown one.
+  const KINDS = [
+    { tint: "#9cc8e8", feet: 0 }, // water bottle, faint blue, ribbed ring
+    { tint: "#5fbf7a", feet: 5 }, // green soda bottle, five feet
+    { tint: "#dfe6ea", feet: 5 }, // clear soda bottle
+    { tint: "#c08a4a", feet: 0 }  // brown
+  ];
 
   // 3 × 5 pixel font for the high-score board on the wall.
   const GLYPHS = {
@@ -85,7 +98,7 @@
   }
   function mix(a, b, t) {
     const A = hexRgb(a), B = hexRgb(b);
-    return "rgb(" + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(",") + ")";
+    return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
   }
   function rgba(h, a) {
     const c = hexRgb(h);
@@ -96,39 +109,111 @@
   const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
   const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-  function capsule(ctx, cx, cy, w, h) {
-    const r = w / 2;
-    ctx.beginPath();
-    ctx.moveTo(cx - r, cy - h / 2 + r);
-    ctx.arc(cx, cy - h / 2 + r, r, Math.PI, 0);
-    ctx.lineTo(cx + r, cy + h / 2 - r);
-    ctx.arc(cx, cy + h / 2 - r, r, 0, Math.PI);
-    ctx.closePath();
-  }
-
-  // One bottle, centred on (cx, cy), cell size c. `lit` is an LED colour or null.
-  function drawBottle(ctx, cx, cy, c, lit) {
-    const w = c * 0.64, h = c * 0.84;
-    capsule(ctx, cx, cy, w, h);
-    if (lit) {
-      const g = ctx.createRadialGradient(cx - w * 0.1, cy - h * 0.12, 0, cx, cy, h * 0.62);
-      g.addColorStop(0, mix(lit, "#ffffff", 0.6));
-      g.addColorStop(0.55, lit);
-      g.addColorStop(1, mix(lit, "#000000", 0.2));
-      ctx.fillStyle = g;
-    } else {
-      ctx.fillStyle = S.bottle;
+  // Every bottle is a little different: kind, size, how straight it sits.
+  const BOTTLES = (function () {
+    const r = rng(512), out = [];
+    for (let i = 0; i < N; i++) {
+      const roll = r();
+      out.push({
+        kind: roll < 0.5 ? 0 : roll < 0.76 ? 1 : roll < 0.96 ? 2 : 3,
+        dx: (r() - 0.5) * 0.09,
+        dy: (r() - 0.5) * 0.09,
+        size: 0.9 + r() * 0.1,
+        rot: r() * TAU,
+        sheen: 0.6 + r() * 0.7
+      });
     }
+    return out;
+  })();
+  const BASE_R = 0.47; // bottle radius as a share of the cell
+
+  // The bottom of one bottle, centred on (cx, cy), radius r.
+  // `lit` is an LED colour or null. Unlit bottles also catch the street lamp.
+  function drawBase(ctx, cx, cy, r, kind, lit, rot, sheen) {
+    const K = KINDS[kind];
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rot || 0);
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, TAU);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+    if (lit) {
+      // the LED sits in the neck, right behind the centre: hot core, light piped round the rim
+      const body = mix(lit, K.tint, 0.18);
+      g.addColorStop(0, mix(lit, "#ffffff", 0.8));
+      g.addColorStop(0.3, body);
+      g.addColorStop(0.74, mix(body, "#000000", 0.4));
+      g.addColorStop(0.92, body);
+      g.addColorStop(1, mix(body, "#000000", 0.55));
+    } else {
+      g.addColorStop(0, mix(K.tint, S.backing, 0.93));
+      g.addColorStop(0.82, mix(K.tint, S.backing, 0.9));
+      g.addColorStop(0.95, mix(K.tint, S.backing, 0.78));
+      g.addColorStop(1, mix(K.tint, S.backing, 0.88));
+    }
+    ctx.fillStyle = g;
     ctx.fill();
-    if (!lit && c >= 7) {
-      ctx.lineWidth = Math.max(0.5, c * 0.04);
-      ctx.strokeStyle = S.bottleEdge;
+
+    const lw = Math.max(0.5, r * 0.07);
+    ctx.lineCap = "round";
+    if (K.feet) {
+      // five feet, with dark valleys between them
+      ctx.fillStyle = lit ? "rgba(255,255,255,0.26)" : "rgba(255,255,255,0.025)";
+      ctx.strokeStyle = lit ? "rgba(0,0,0,0.22)" : "rgba(0,0,0,0.3)";
+      ctx.lineWidth = lw * 1.2;
+      for (let j = 0; j < K.feet; j++) {
+        const a = (j * TAU) / K.feet;
+        ctx.beginPath();
+        ctx.ellipse(Math.cos(a) * r * 0.52, Math.sin(a) * r * 0.52, r * 0.3, r * 0.21, a, 0, TAU);
+        ctx.fill();
+        const v = a + Math.PI / K.feet;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(v) * r * 0.22, Math.sin(v) * r * 0.22);
+        ctx.lineTo(Math.cos(v) * r * 0.86, Math.sin(v) * r * 0.86);
+        ctx.stroke();
+      }
+    } else {
+      // flat base: one ring and short ribs
+      ctx.strokeStyle = lit ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.03)";
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.6, 0, TAU);
+      ctx.stroke();
+      ctx.lineWidth = lw * 0.6;
+      ctx.beginPath();
+      for (let j = 0; j < 14; j++) {
+        const a = (j * TAU) / 14;
+        ctx.moveTo(Math.cos(a) * r * 0.66, Math.sin(a) * r * 0.66);
+        ctx.lineTo(Math.cos(a) * r * 0.88, Math.sin(a) * r * 0.88);
+      }
       ctx.stroke();
     }
-    // the little highlight that makes it read as plastic
-    ctx.fillStyle = lit ? "rgba(255,255,255,0.5)" : "rgba(220,228,255,0.1)";
-    capsule(ctx, cx - w * 0.22, cy - h * 0.12, w * 0.16, h * 0.42);
+    // the injection point in the middle
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.1, 0, TAU);
+    ctx.fillStyle = lit ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.45)";
     ctx.fill();
+    ctx.restore();
+
+    // rim and reflections stay put while the bottle turns: the light comes from fixed places
+    ctx.lineCap = "round";
+    ctx.lineWidth = lw;
+    ctx.strokeStyle = lit ? rgba(mix(lit, "#ffffff", 0.4), 0.9) : "rgba(255,255,255,0.045)";
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.95, 0, TAU);
+    ctx.stroke();
+    if (!lit) {
+      const k = sheen || 1;
+      ctx.lineWidth = r * 0.1;
+      ctx.strokeStyle = "rgba(220,230,255," + (0.09 * k).toFixed(3) + ")"; // the night sky
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.76, -2.7, -1.85);
+      ctx.stroke();
+      ctx.strokeStyle = rgba(S.sodium, 0.14 * k); // the street lamp, low and to the right
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.78, 0.3, 0.95);
+      ctx.stroke();
+    }
   }
 
   // ───────────── Snake ─────────────
@@ -348,8 +433,8 @@
       g.fillStyle = haze;
       g.fillRect(0, 0, W, H);
       // stars
-      g.fillStyle = "rgba(230,232,255,0.55)";
-      for (let i = 0; i < 70; i++) {
+      g.fillStyle = "rgba(230,232,255,0.5)";
+      for (let i = 0; i < 50; i++) {
         const x = r() * W, y = r() * groundY * 0.7, s = r() < 0.15 ? 1.4 : 0.8;
         g.globalAlpha = 0.25 + r() * 0.6;
         g.fillRect(x, y, s, s);
@@ -376,7 +461,7 @@
       const lTop = Math.max(roofY + 6 * c, groundY - 30 * c), rTop = Math.max(roofY - 3 * c, groundY - 40 * c);
       g.fillRect(-10, lTop, bx0 + 4, groundY - lTop);
       g.fillRect(bx1 - 4, rTop, W - bx1 + 14, groundY - rTop);
-      g.fillStyle = "rgba(242,166,90,0.32)";
+      g.fillStyle = "rgba(242,166,90,0.2)";
       for (let i = 0; i < 26; i++) {
         const side = i % 2;
         const x0 = side ? bx1 + 2 * c : 0, x1 = side ? W : bx0 - 2 * c;
@@ -422,32 +507,47 @@
       for (let f = 0; f <= L.floors; f++) {
         g.fillRect(bx0, wallFloorTop - f * L.floorH - 0.5 * c, bx1 - bx0, 0.5 * c);
       }
-      // windows
+      // windows, and the rain streaks under their sills
       for (const w of L.windows) drawWindow(g, w);
+      for (const w of L.windows) stain(g, w.x + w.w * (0.2 + r() * 0.3), w.y + w.h + 0.55 * c, w.w * (0.35 + r() * 0.3), (2.5 + r() * 4) * c, 0.22);
 
-      // the balcony frame holding the bottles
-      g.fillStyle = "#1a1e36";
+      // the frame on the balcony: a dark backing and wire mesh...
+      g.fillStyle = S.backing;
       g.fillRect(frame.x, frame.y, frame.w, frame.h);
-      g.strokeStyle = S.edgeHi;
-      g.lineWidth = Math.max(1.5, c * 0.28);
-      g.strokeRect(frame.x, frame.y, frame.w, frame.h);
-      // mesh
-      g.strokeStyle = "rgba(90,100,150,0.18)";
-      g.lineWidth = Math.max(0.5, c * 0.05);
+      g.strokeStyle = "rgba(255,255,255,0.05)";
+      g.lineWidth = Math.max(0.5, c * 0.04);
       g.beginPath();
       for (let i = 0; i <= COLS; i++) { const xx = L.gx + i * c; g.moveTo(xx, L.gy); g.lineTo(xx, L.gy + L.gh); }
       for (let j = 0; j <= ROWS; j++) { const yy = L.gy + j * c; g.moveTo(L.gx, yy); g.lineTo(L.gx + L.gw, yy); }
       g.stroke();
-      // unlit bottles
-      for (let j = 0; j < ROWS; j++) {
-        for (let i = 0; i < COLS; i++) drawBottle(g, L.gx + (i + 0.5) * c, L.gy + (j + 0.5) * c, c, null);
+      // ...the bottles, each pushed in by hand...
+      for (let i = 0; i < N; i++) {
+        const b = BOTTLES[i], [x, y] = cellCentre(i);
+        g.fillStyle = "rgba(0,0,0,0.5)";
+        g.beginPath();
+        g.arc(x + c * 0.03, y + c * 0.05, c * BASE_R * b.size, 0, TAU);
+        g.fill();
+        drawBase(g, x, y, c * BASE_R * b.size, b.kind, null, b.rot, b.sheen);
       }
-      // AC unit next to the wall, with its drip line
+      // ...and treated wood around it all, screwed together
+      drawFrameWood(g);
+      // the power cable, taped down the facade and in through the window
+      g.strokeStyle = "#050506";
+      g.lineWidth = Math.max(1, c * 0.14);
+      g.lineCap = "round";
+      g.beginPath();
+      g.moveTo(frame.x + 1.2 * c, frame.y + frame.h - 0.2 * c);
+      g.quadraticCurveTo(frame.x - 0.4 * c, frame.y + frame.h + 0.6 * c, frame.x - 1.6 * c, slabY + slabH * 0.4);
+      g.stroke();
+      // AC unit next to the wall, with its drip line and the stain it leaves
       const acx = frame.x + frame.w + 1.2 * c, acy = frame.y + frame.h * 0.18;
       if (acx + 4 * c < bx1 - 1.2 * c) {
-        g.fillStyle = "#2f3555";
+        stain(g, acx + 0.1 * c, acy + 2.8 * c, 1.4 * c, slabY - acy - 2.8 * c, 0.3);
+        g.fillStyle = "#2a2c31";
         g.fillRect(acx, acy, 4 * c, 2.8 * c);
-        g.strokeStyle = "#20243f";
+        g.fillStyle = "rgba(255,255,255,0.05)";
+        g.fillRect(acx, acy, 4 * c, Math.max(1, c * 0.12));
+        g.strokeStyle = "#17181c";
         g.lineWidth = Math.max(1, c * 0.12);
         g.beginPath(); g.arc(acx + 2.6 * c, acy + 1.4 * c, 0.95 * c, 0, Math.PI * 2); g.stroke();
         g.beginPath(); g.moveTo(acx + 0.6 * c, acy + 2.8 * c); g.lineTo(acx + 0.6 * c, slabY); g.stroke();
@@ -464,6 +564,57 @@
       drawPerson(g);
     }
 
+    // a soft vertical streak of dirt on the plaster
+    function stain(g, x, y, w, h, a) {
+      if (h <= 0) return;
+      const gr = g.createLinearGradient(0, y, 0, y + h);
+      gr.addColorStop(0, "rgba(0,0,0," + a + ")");
+      gr.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = gr;
+      g.fillRect(x, y, w, h);
+    }
+
+    function drawFrameWood(g) {
+      const { c, frame } = L;
+      const t = Math.max(3, c * 0.6);
+      const r = rng(11);
+      const beams = [
+        [frame.x - t * 0.3, frame.y - t * 0.3, frame.w + t * 0.6, t],
+        [frame.x - t * 0.3, frame.y + frame.h - t * 0.7, frame.w + t * 0.6, t],
+        [frame.x - t * 0.3, frame.y - t * 0.3, t, frame.h + t * 0.6],
+        [frame.x + frame.w - t * 0.7, frame.y - t * 0.3, t, frame.h + t * 0.6]
+      ];
+      for (const [x, y, w, h] of beams) {
+        const across = w > h;
+        const gr = across ? g.createLinearGradient(0, y, 0, y + h) : g.createLinearGradient(x, 0, x + w, 0);
+        gr.addColorStop(0, "#4a3726");
+        gr.addColorStop(0.5, S.wood);
+        gr.addColorStop(1, S.woodDark);
+        g.fillStyle = gr;
+        g.fillRect(x, y, w, h);
+        // grain
+        g.strokeStyle = "rgba(0,0,0,0.22)";
+        g.lineWidth = Math.max(0.4, c * 0.03);
+        g.beginPath();
+        for (let k = 0; k < 3; k++) {
+          const o = (0.25 + r() * 0.5) * (across ? h : w);
+          if (across) { g.moveTo(x + r() * w * 0.2, y + o); g.lineTo(x + w * (0.6 + r() * 0.4), y + o + (r() - 0.5) * 2); }
+          else { g.moveTo(x + o, y + r() * h * 0.2); g.lineTo(x + o + (r() - 0.5) * 2, y + h * (0.6 + r() * 0.4)); }
+        }
+        g.stroke();
+      }
+      // sodium from the street catches the bottom edge
+      g.fillStyle = rgba(S.sodium, 0.18);
+      g.fillRect(frame.x - t * 0.3, frame.y + frame.h + t * 0.3 - Math.max(1, c * 0.1), frame.w + t * 0.6, Math.max(1, c * 0.1));
+      // screws at the corners
+      g.fillStyle = "rgba(200,200,190,0.35)";
+      for (const [x, y] of [[frame.x + t * 0.2, frame.y + t * 0.2], [frame.x + frame.w - t * 0.2, frame.y + t * 0.2], [frame.x + t * 0.2, frame.y + frame.h - t * 0.2], [frame.x + frame.w - t * 0.2, frame.y + frame.h - t * 0.2]]) {
+        g.beginPath();
+        g.arc(x, y, Math.max(0.6, c * 0.07), 0, TAU);
+        g.fill();
+      }
+    }
+
     function drawWindow(g, w) {
       const c = L.c;
       g.fillStyle = S.edge;
@@ -474,23 +625,23 @@
         gr.addColorStop(1, "#8a6a4e");
         g.fillStyle = gr;
       } else if (w.kind === "dim") {
-        g.fillStyle = "#3a3a52";
+        g.fillStyle = "#26262c";
       } else {
-        g.fillStyle = "#151a30";
+        g.fillStyle = "#0c0d11";
       }
       g.fillRect(w.x, w.y, w.w, w.h);
       if (w.kind === "warm") {
         // curtain edge and a sodium rim on the frame
-        g.fillStyle = "rgba(20,22,40,0.45)";
+        g.fillStyle = "rgba(0,0,0,0.4)";
         g.fillRect(w.x, w.y, w.w * 0.28, w.h);
         g.fillStyle = rgba(S.sodium, 0.35);
         g.fillRect(w.x - 0.35 * c, w.y + w.h + 0.35 * c, w.w + 0.7 * c, 0.2 * c);
       }
       // half-closed shutters (persiennes)
       const shut = w.kind === "shutter" ? 0.55 + w.shutter * 0.45 : w.kind === "dark" ? w.shutter * 0.5 : 0.12;
-      g.fillStyle = "#2a3050";
+      g.fillStyle = "#1e2026";
       g.fillRect(w.x, w.y, w.w, w.h * shut);
-      g.strokeStyle = "rgba(10,12,28,0.5)";
+      g.strokeStyle = "rgba(0,0,0,0.5)";
       g.lineWidth = Math.max(0.5, c * 0.07);
       g.beginPath();
       for (let y = w.y + c * 0.45; y < w.y + w.h * shut; y += c * 0.45) { g.moveTo(w.x, y); g.lineTo(w.x + w.w, y); }
@@ -523,23 +674,23 @@
       g.fillStyle = S.edge;
       g.fillRect(cxl + cw * 0.5 - 0.15 * c, wy, 0.3 * c, ch);
       // awning
-      g.fillStyle = "#2f3658";
+      g.fillStyle = "#26282e";
       g.fillRect(cxl - 0.9 * c, wy - 1.4 * c, cw + 1.8 * c, 1 * c);
       // building entrance
       const dw = Math.max(2.6 * c, 14), dh = Math.min(gh * 0.78, 9 * c);
       const dx = cx + frame.w * 0.04;
       g.fillStyle = S.edge;
       g.fillRect(dx - 0.4 * c, groundY - dh - 0.4 * c, dw + 0.8 * c, dh + 0.4 * c);
-      g.fillStyle = "#121628";
+      g.fillStyle = "#0b0c0f";
       g.fillRect(dx, groundY - dh, dw, dh);
       g.fillStyle = "rgba(242,166,90,0.22)";
       g.fillRect(dx + dw * 0.15, groundY - dh + dh * 0.1, dw * 0.7, dh * 0.35);
       // a shop with its shutter rolled down
       const sw = frame.w * 0.3, sh = Math.min(gh * 0.66, 8 * c);
       const sx = cx + frame.w * 0.2;
-      g.fillStyle = "#2d3352";
+      g.fillStyle = "#1d1f24";
       g.fillRect(sx, groundY - sh, sw, sh);
-      g.strokeStyle = "rgba(10,12,28,0.55)";
+      g.strokeStyle = "rgba(0,0,0,0.55)";
       g.lineWidth = Math.max(0.5, c * 0.08);
       g.beginPath();
       for (let y = groundY - sh + c * 0.4; y < groundY; y += c * 0.4) { g.moveTo(sx, y); g.lineTo(sx + sw, y); }
@@ -586,7 +737,7 @@
       g.fillRect(hx - 26 * c, lampY - 26 * c, 52 * c, 52 * c);
       g.restore();
       // pole and arm
-      g.strokeStyle = "#11152a";
+      g.strokeStyle = "#0c0d10";
       g.lineCap = "round";
       g.lineWidth = Math.max(2, c * 0.42);
       g.beginPath();
@@ -596,7 +747,7 @@
       g.lineTo(hx, lampY);
       g.stroke();
       // head and bulb
-      g.fillStyle = "#11152a";
+      g.fillStyle = "#0c0d10";
       g.beginPath();
       g.ellipse(hx, lampY + 0.2 * c, 1.3 * c, 0.5 * c, 0, Math.PI, 0);
       g.fill();
@@ -658,14 +809,16 @@
 
     function buildSprites() {
       const c = L.c;
-      sprites = { body: [], glow: [], size: c, glowR: c * 2.6 };
+      sprites = { body: KINDS.map(() => []), glow: [], size: c, glowR: c * 2.6 };
       for (let k = 1; k < LED.length; k++) {
-        const b = document.createElement("canvas");
-        b.width = b.height = Math.ceil(c * dpr) + 2;
-        const bc = b.getContext("2d");
-        bc.scale(b.width / c, b.height / c);
-        drawBottle(bc, c / 2, c / 2, c, LED[k]);
-        sprites.body[k] = b;
+        for (let kind = 0; kind < KINDS.length; kind++) {
+          const b = document.createElement("canvas");
+          b.width = b.height = Math.ceil(c * dpr) + 2;
+          const bc = b.getContext("2d");
+          bc.scale(b.width / c, b.height / c);
+          drawBase(bc, c / 2, c / 2, c * BASE_R, kind, LED[k], 0);
+          sprites.body[kind][k] = b;
+        }
 
         const gR = sprites.glowR;
         const gcv = document.createElement("canvas");
@@ -871,7 +1024,8 @@
     }
 
     function cellCentre(i) {
-      return [L.gx + ((i % COLS) + 0.5) * L.c, L.gy + (((i / COLS) | 0) + 0.5) * L.c];
+      const b = BOTTLES[i];
+      return [L.gx + ((i % COLS) + 0.5 + b.dx) * L.c, L.gy + (((i / COLS) | 0) + 0.5 + b.dy) * L.c];
     }
 
     function render() {
@@ -936,16 +1090,24 @@
       for (let i = 0; i < N; i++) {
         const b = cur[i];
         if (b < 0.02 || i === target) continue;
-        const [x, y] = cellCentre(i);
+        const [x, y] = cellCentre(i), B = BOTTLES[i];
         ctx.globalAlpha = Math.min(1, b);
-        if (s > 2) drawBottle(ctx, x, y, c, LED[col[i]]);
-        else ctx.drawImage(sprites.body[col[i]], x - c / 2, y - c / 2, c, c);
+        if (s > 2) {
+          drawBase(ctx, x, y, c * BASE_R * B.size, B.kind, LED[col[i]], B.rot);
+        } else {
+          const d = c * B.size;
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(B.rot);
+          ctx.drawImage(sprites.body[B.kind][col[i]], -d / 2, -d / 2, d, d);
+          ctx.restore();
+        }
       }
       ctx.globalAlpha = 1;
 
       // the phone in the street mirrors the game
       if (L.phone) {
-        ctx.fillStyle = mix("#0d3a22", LED[GREEN], 0.55 + 0.35 * Math.min(1, greenSum / 12));
+        ctx.fillStyle = mix("#1a2200", LED[GREEN], 0.55 + 0.35 * Math.min(1, greenSum / 12));
         ctx.fillRect(L.phone.x, L.phone.y, L.phone.w, L.phone.h);
       }
 
@@ -959,13 +1121,13 @@
         ctx.drawImage(sprites.glow[WHITE], x - gR * 1.4, y - gR * 1.4, gR * 2.8, gR * 2.8);
         ctx.globalCompositeOperation = "source-over";
         ctx.globalAlpha = 1;
-        // flat fill so the edges don't go grey as it fills the screen
-        capsule(ctx, x, y, c * 0.64, c * 0.84);
-        ctx.fillStyle = m < 0.5 ? mix(base, "#fffaf0", m * 2) : mix("#fffaf0", PAPER, (m - 0.5) * 2);
-        ctx.fill();
-        ctx.globalAlpha = 0.5 * (1 - m);
-        ctx.fillStyle = "#ffffff";
-        capsule(ctx, x - c * 0.14, y - c * 0.1, c * 0.1, c * 0.35);
+        // the real bottle first, then a flat fill so the edges don't go grey as it fills the screen
+        const B = BOTTLES[target], R = c * BASE_R * B.size;
+        drawBase(ctx, x, y, R, B.kind, base, B.rot);
+        ctx.globalAlpha = smooth(0.05, 0.45, zt);
+        ctx.beginPath();
+        ctx.arc(x, y, R, 0, TAU);
+        ctx.fillStyle = m < 0.5 ? mix(base, "#fbffe6", m * 2) : mix("#fbffe6", PAPER, (m - 0.5) * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
@@ -988,6 +1150,11 @@
         if (z.dir > 0) { stop(); } else { zoom = null; render(); }
         z.done && z.done();
       }
+    }
+
+    // how far to scale so one bottle base covers the whole screen
+    function zoomScale(cell) {
+      return (1.15 * Math.hypot(W, H)) / (2 * L.c * BASE_R * BOTTLES[cell].size);
     }
 
     function renderOnce() {
@@ -1056,16 +1223,14 @@
       },
       zoomIn(cell, done) {
         if (cell == null || cell < 0) cell = game && game.body ? game.body[0] : (ROWS >> 1) * COLS + (COLS >> 1);
-        const c = L.c;
-        const smax = 1.3 * Math.max(W / (c * 0.64), H / (c * 0.84));
+        const smax = zoomScale(cell);
         zoom = { t0: performance.now(), dur: 1150, dir: 1, cell, smax, done };
         if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
       },
       zoomOut(done) {
         if (mode === "idle" || mode === "intro") setMode("demo");
         const cell = zoom && zoom.cell != null ? zoom.cell : game.body[0];
-        const c = L.c;
-        const smax = 1.3 * Math.max(W / (c * 0.64), H / (c * 0.84));
+        const smax = zoomScale(cell);
         zoom = { t0: performance.now(), dur: 950, dir: -1, cell, smax, done };
         if (reduced && mode !== "play") {
           // no motion: jump straight back to the still frame

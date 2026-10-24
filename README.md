@@ -85,7 +85,8 @@ It's a static site, so any static host works. Upload the whole folder as is.
 - **GitHub Pages**: push the folder to a repository, then Settings → Pages →
   deploy from the branch root.
 
-The only external request is Google Fonts (Doto and IBM Plex Sans Arabic).
+The only external request is Google Fonts (Urbanist, with IBM Plex Sans Arabic
+for Arabic text).
 Without a connection, the page falls back to system fonts and still works.
 
 ## Notes
