@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Our building is a video game: sponsor pitch</title>
+<meta name="description" content="Sponsor pitch: 512 recycled plastic bottles become a giant Snake screen on a Tunisian building.">
+<meta name="theme-color" content="#0c0c0b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400..700&display=swap" rel="stylesheet">
+<style>
+  /* Presenter for the sponsor deck: 1920x1080 slides scaled to fit the window. */
+  html, body { margin: 0; height: 100%; background: #050505; overflow: hidden; }
+  body { font-family: "Urbanist", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  .stage { position: fixed; inset: 0; overflow: hidden; }
+  .deck { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; }
+  .slide { position: absolute; inset: 0; width: 1920px; height: 1080px; box-sizing: border-box; overflow: hidden;
+           opacity: 0; visibility: hidden; transition: opacity .45s cubic-bezier(.3,0,.04,1), visibility 0s .45s; }
+  .slide.is-current { opacity: 1; visibility: visible; transition: opacity .45s cubic-bezier(.3,0,.04,1); }
+  .slide * { box-sizing: border-box; margin: 0; }
+  .slide h1, .slide h2, .slide h3, .slide p { font-weight: inherit; }
+  .slide h1 { font-weight: 600; } .slide h2, .slide h3 { font-weight: 600; }
+  .slide ul { padding-left: 1.1em; display: flex; flex-direction: column; gap: .35em; }
+  .slide a { color: inherit; text-underline-offset: .15em; }
+  .slide table { width: 100%; border-collapse: collapse; }
+  .slide th, .slide td { padding: .35em .6em; text-align: left; border-bottom: 1px solid rgba(255,255,255,.12); font-weight: 500; }
+  .slide th { font-weight: 500; border-bottom-color: rgba(255,255,255,.28); }
+  .slide [style*="background-clip:text"] { -webkit-background-clip: text; padding-bottom: .14em; }
+  .slide svg { display: block; flex: none; }
+  .x-arrow { flex: none; }
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px;
+         padding: 10px 16px max(10px, env(safe-area-inset-bottom)); color: #a8a8a2; font: 500 14px "Urbanist", Arial, sans-serif;
+         opacity: 0; transition: opacity .3s; }
+  body:hover .bar, .bar:focus-within { opacity: 1; }
+  @media (hover: none) { .bar { opacity: 1; } }
+  .bar button { min-width: 44px; min-height: 40px; border: 1px solid #2a2a27; border-radius: 999px; background: #161614;
+                color: #f2f2ee; font: inherit; cursor: pointer; padding: 0 14px; }
+  .bar button:hover { border-color: #d4fb08; }
+  .bar .count { font-variant-numeric: tabular-nums; }
+  .bar .spacer { flex: 1; }
+  .progress { position: fixed; left: 0; top: 0; height: 3px; background: #d4fb08; transition: width .45s cubic-bezier(.3,0,.04,1); }
+  :focus-visible { outline: 2.5px solid #d4fb08; outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .slide, .slide.is-current, .progress { transition: none; } }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<main class="stage" id="stage">
+<div class="deck" id="deck">
+<section class="slide" aria-label="Slide 1" id="cover" data-transition="fade" style="background:#0c0c0b;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:32px">
+<img src="img/wall-cover.jpg" alt="Night view of a Tunisian apartment building: on the balcony, a wooden frame of 512 plastic bottles lights up with a lime-green snake, while someone in the street holds up a phone" style="position:absolute;left:720px;top:0;width:1200px;height:1080px;object-fit:cover">
+<div style="position:absolute;left:720px;top:0;width:520px;height:1080px;background:linear-gradient(90deg, #0c0c0b 0%, rgba(12,12,11,0) 100%)"></div>
+<p style="font-size:24px;font-weight:600;color:#d4fb08;width:600px">Sponsor deck · [Lab name]</p>
+<h1 style="font-size:120px;font-weight:500;line-height:0.95;letter-spacing:-5px;width:640px;background:linear-gradient(100deg, #d4fb08 0%, #9cf23a 55%, #e2fb08 100%);background-clip:text;-webkit-text-fill-color:transparent">Our building is a video game</h1>
+<p style="font-size:32px;line-height:1.35;color:#a8a8a2;width:560px">512 recycled bottles. One playable facade. A whole street outside, together.</p>
+</section>
+<section class="slide" aria-label="Slide 2" id="idea" data-transition="fade" style="background:#0c0c0b;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">The idea</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.1;letter-spacing:-2px;width:1500px">We’re turning 512 empty plastic bottles into a giant screen on our building, and the whole neighbourhood plays Snake on it from their phones.</h2>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;padding:32px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<p style="font-size:72px;font-weight:400;line-height:1;letter-spacing:-2px;color:#d4fb08">32 × 16</p>
+<p style="font-size:24px;color:#a8a8a2">bottles on one balcony frame</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;padding:32px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<p style="font-size:72px;font-weight:400;line-height:1;letter-spacing:-2px;color:#d4fb08">1 LED</p>
+<p style="font-size:24px;color:#a8a8a2">in the neck of every bottle</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;padding:32px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<p style="font-size:72px;font-weight:400;line-height:1;letter-spacing:-2px;color:#d4fb08">0 apps</p>
+<p style="font-size:24px;color:#a8a8a2">scan a QR code and play</p>
+</div>
+</div>
+</section>
+<section class="slide" aria-label="Slide 3" id="demo" data-transition="fade" style="background:#151513;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:grid;grid-template-columns:928px 640px;gap:96px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">Live demo</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px">This is the mini wall: 64 bottles, playing now</h2>
+<p style="font-size:32px;line-height:1.4;color:#a8a8a2">8 × 8 bottles on the same electronics as the full wall. Scan the code and take a turn at Snake. It’s Episode 1 of the season, running in front of you.</p>
+<div style="display:flex;gap:32px;align-items:center">
+<div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;padding:16px;border:2px dashed #d4fb08;border-radius:20px">
+<p style="font-size:24px;line-height:1.2;text-align:center;color:#d4fb08">[QR code]</p>
+</div>
+<p style="font-size:32px;line-height:1.3;width:520px">Scan to play.<br><span style="color:#a8a8a2">One player at a time, about a minute each.</span></p>
+</div>
+</div>
+<svg aria-label="Diagram of the 8 by 8 mini wall: 64 bottle bottoms in a wooden frame, six lit lime as the snake and one lit red as the food" width="640" height="640" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern id="bottles" x="32" y="32" width="72" height="72" patternUnits="userSpaceOnUse">
+<circle cx="36" cy="36" r="30" fill="#1c2023" stroke="#33383d" stroke-width="3"/>
+<circle cx="36" cy="36" r="4" fill="#0c0d0e"/>
+</pattern>
+<filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="14"/></filter>
+</defs>
+<rect x="12" y="12" width="616" height="616" rx="10" fill="#08090a" stroke="#4a3726" stroke-width="20"/>
+<rect x="32" y="32" width="576" height="576" fill="url(#bottles)"/>
+<g filter="url(#glow)" opacity="0.85">
+<circle cx="140" cy="428" r="30" fill="#d4fb08"/>
+<circle cx="212" cy="428" r="30" fill="#d4fb08"/>
+<circle cx="284" cy="428" r="30" fill="#d4fb08"/>
+<circle cx="356" cy="428" r="30" fill="#d4fb08"/>
+<circle cx="356" cy="356" r="30" fill="#d4fb08"/>
+<circle cx="356" cy="284" r="30" fill="#f3ffb5"/>
+<circle cx="500" cy="212" r="30" fill="#ff4d3d"/>
+</g>
+<circle cx="140" cy="428" r="30" fill="#b9dc06" stroke="#e6ff6a" stroke-width="3"/>
+<circle cx="212" cy="428" r="30" fill="#c3e807" stroke="#e6ff6a" stroke-width="3"/>
+<circle cx="284" cy="428" r="30" fill="#cdf208" stroke="#e6ff6a" stroke-width="3"/>
+<circle cx="356" cy="428" r="30" fill="#d4fb08" stroke="#e6ff6a" stroke-width="3"/>
+<circle cx="356" cy="356" r="30" fill="#d4fb08" stroke="#e6ff6a" stroke-width="3"/>
+<circle cx="356" cy="284" r="30" fill="#f3ffb5" stroke="#ffffff" stroke-width="3"/>
+<circle cx="500" cy="212" r="30" fill="#ff4d3d" stroke="#ff9a8f" stroke-width="3"/>
+<circle cx="356" cy="284" r="10" fill="#ffffff"/>
+</svg>
+</section>
+<section class="slide" aria-label="Slide 4" id="how" data-transition="fade" style="background:#0c0c0b;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">How it works</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px">How a move travels from a phone to the bottles</h2>
+</div>
+<div style="display:flex;gap:24px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;padding:32px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:44px;font-weight:500;letter-spacing:-1px">Phone</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">Scan the QR code, steer with a D-pad. No app.</p>
+</div>
+<svg class="x-arrow" viewBox="0 0 56 28" width="56" height="28" aria-hidden="true"><path d="M0 9h34V0l22 14-22 14v-9H0z" fill="#d4fb08"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;padding:32px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:44px;font-weight:500;letter-spacing:-1px">Server</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">Runs the game and sends about 20 frames a second.</p>
+</div>
+<svg class="x-arrow" viewBox="0 0 56 28" width="56" height="28" aria-hidden="true"><path d="M0 9h34V0l22 14-22 14v-9H0z" fill="#d4fb08"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;padding:32px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:44px;font-weight:500;letter-spacing:-1px">ESP32</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">A small controller running WLED, open-source LED software.</p>
+</div>
+<svg class="x-arrow" viewBox="0 0 56 28" width="56" height="28" aria-hidden="true"><path d="M0 9h34V0l22 14-22 14v-9H0z" fill="#d4fb08"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;padding:32px;background:#d4fb08;border:1px solid #d4fb08;border-radius:20px">
+<h3 style="font-size:44px;font-weight:500;letter-spacing:-1px;color:#0c0c0b">Bottles</h3>
+<p style="font-size:24px;line-height:1.4;color:#2b3200">One waterproof LED pushed into each bottle’s neck.</p>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#a8a8a2;width:1300px">Same build at two sizes: <span style="color:#f2f2ee">64 bottles</span> for the mini wall you just played, <span style="color:#f2f2ee">512 bottles</span> on the facade.</p>
+</section>
+<section class="slide" aria-label="Slide 5" id="why" data-transition="fade" style="background:#0c0c0b;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:grid;grid-template-columns:944px 672px;gap:48px;align-items:stretch">
+<div style="display:flex;flex-direction:column;justify-content:space-between;gap:40px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">Why it travels</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px">Why people will stop and play</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div style="display:flex;flex-direction:column;gap:8px;padding:28px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:32px;font-weight:600">Instantly visual</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">A building that becomes a video game reads in one second on any feed.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;padding:28px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:32px;font-weight:600">Everyone can join</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">Scan, play on the building. The audience becomes the content.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;padding:28px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:32px;font-weight:600">Scrap to magic</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">Bottles everyone throws away become a light show. Recycling, without preaching.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;padding:28px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:32px;font-weight:600">The street together</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">Kids, grandparents and café regulars on one screen. Very Tunisian, very warm.</p>
+</div>
+</div>
+</div>
+<img src="img/wall-closeup.jpg" alt="Close-up of the bottle wall at night: rows of bottle bottoms, a lime snake lit across the lower rows and one red bottle as the food" style="width:672px;height:824px;object-fit:cover;border-radius:20px">
+</section>
+<section class="slide" aria-label="Slide 6" id="season" data-transition="fade" style="background:#0c0c0b;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">The season</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px">One season, seven episodes</h2>
+</div>
+<table style="font-family:'Urbanist', Arial, sans-serif;font-size:26px;color:#f2f2ee">
+<tr><th style="width:8%;color:#a8a8a2">Ep.</th><th style="width:40%;color:#a8a8a2">Episode</th><th style="width:52%;color:#a8a8a2">The moment it lands on</th></tr>
+<tr><td>0</td><td>Teaser (30 seconds)</td><td style="color:#a8a8a2">One bottle lights up… then 512</td></tr>
+<tr style="background:#1d2100"><td style="color:#d4fb08">1</td><td style="color:#d4fb08">We need 512 bottles</td><td style="color:#d4fb08">The mini wall works (you just played it)</td></tr>
+<tr><td>2</td><td>Convincing the building</td><td style="color:#a8a8a2">The neighbours say yes, and some help build</td></tr>
+<tr><td>3</td><td>The build</td><td style="color:#a8a8a2">The full wall lights up for the first time</td></tr>
+<tr><td>4</td><td>Launch night: the street plays</td><td style="color:#a8a8a2">Kids vs. grandparents vs. café regulars</td></tr>
+<tr><td>5</td><td>Making it smart</td><td style="color:#a8a8a2">The street’s first collective pixel artwork</td></tr>
+<tr><td>6</td><td>Finale: Ramadan nights</td><td style="color:#a8a8a2">An iftar countdown on the building, then the street plays</td></tr>
+</table>
+<p style="font-size:24px;color:#a8a8a2">Every episode ships as a long video, shorts and reels, a live game night and a carousel.</p>
+</section>
+<section class="slide" aria-label="Slide 7" id="timeline" data-transition="fade" style="background:#151513;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">When</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px">From bottles to Ramadan nights</h2>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:32px 0 0;border-top:4px solid #d4fb08">
+<p style="font-size:44px;font-weight:500;letter-spacing:-1px">Oct – Dec 2026</p>
+<p style="font-size:32px;line-height:1.35;color:#a8a8a2;width:480px">Collect the bottles, build the prototype, get permissions, build the wall.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:32px 0 0;border-top:4px solid #5c6b0a">
+<p style="font-size:44px;font-weight:500;letter-spacing:-1px">Winter evenings</p>
+<p style="font-size:32px;line-height:1.35;color:#a8a8a2;width:480px">Launch. It gets dark early, so the street plays longer.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:32px 0 0;border-top:4px solid #5c6b0a">
+<p style="font-size:44px;font-weight:500;letter-spacing:-1px">Ramadan 2027</p>
+<p style="font-size:32px;line-height:1.35;color:#a8a8a2;width:480px">The finale, around Feb – Mar [dates to confirm]: iftar countdown and game nights.</p>
+</div>
+</div>
+<div style="display:flex;align-items:baseline;gap:24px;padding:32px 40px;background:#0c0c0b;border:1px solid #2a2a27;border-radius:20px">
+<p style="font-size:72px;font-weight:400;letter-spacing:-2px;color:#d4fb08;white-space:nowrap">[__] / 512</p>
+<p style="font-size:32px;color:#a8a8a2">bottles collected so far</p>
+</div>
+</section>
+<section class="slide" aria-label="Slide 8" id="budget" data-transition="fade" style="background:#0c0c0b;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">The budget</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px">What the full 512-bottle wall costs</h2>
+</div>
+<div style="display:grid;grid-template-columns:760px 856px;gap:48px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:120px;font-weight:400;line-height:1;letter-spacing:-5px;color:#d4fb08;white-space:nowrap">1,020–2,450</p>
+<p style="font-size:44px;font-weight:500">TND, all in</p>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2;width:620px">Estimates from our plan, to check against local quotes. The bottles cost nothing: the street gives them.</p>
+</div>
+<table style="font-family:'Urbanist', Arial, sans-serif;font-size:26px;color:#f2f2ee">
+<tr><th style="width:70%;color:#a8a8a2">Item</th><th style="width:30%;color:#a8a8a2;text-align:right">TND</th></tr>
+<tr><td>512 waterproof LEDs</td><td style="text-align:right">400–900</td></tr>
+<tr><td>Power supplies, cables, fuses</td><td style="text-align:right">250–550</td></tr>
+<tr><td>Frame: treated wood or aluminium</td><td style="text-align:right">200–600</td></tr>
+<tr><td>Controller and weatherproofing</td><td style="text-align:right">100–250</td></tr>
+<tr><td>Fixings, QR poster, signage</td><td style="text-align:right">70–150</td></tr>
+<tr><td style="color:#d4fb08">Bottles</td><td style="text-align:right;color:#d4fb08">0</td></tr>
+</table>
+</div>
+</section>
+<section class="slide" aria-label="Slide 9" id="packages" data-transition="fade" style="background:#151513;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">Suggested packages, to shape with you</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px">What a sponsor gets</h2>
+</div>
+<div style="display:flex;gap:16px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;padding:32px;background:#d4fb08;border-radius:20px;color:#0c0c0b">
+<h3 style="font-size:32px;font-weight:600;color:#0c0c0b">Presenting partner</h3>
+<p style="font-size:24px;font-weight:600;color:#0c0c0b">[TND __]</p>
+<ul style="font-size:24px;line-height:1.4;color:#1a1d00">
+<li>“Presented by” on the wall’s start-up animation</li>
+<li>Your logo as pixel art on game nights</li>
+<li>Credit in every episode</li>
+</ul>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;padding:32px;background:#0c0c0b;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:32px;font-weight:600">Episode partner</h3>
+<p style="font-size:24px;font-weight:600;color:#d4fb08">[TND __]</p>
+<ul style="font-size:24px;line-height:1.4;color:#a8a8a2">
+<li>Launch night or the finale in your name</li>
+<li>Thanks in the video and its shorts</li>
+<li>Your logo on the wall that night</li>
+</ul>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;padding:32px;background:#0c0c0b;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:32px;font-weight:600">Materials partner</h3>
+<p style="font-size:24px;font-weight:600;color:#d4fb08">In kind</p>
+<ul style="font-size:24px;line-height:1.4;color:#a8a8a2">
+<li>LEDs, power supplies, wood or aluminium</li>
+<li>Featured in the build episode</li>
+<li>“Built with” on the QR poster</li>
+</ul>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;padding:32px;background:#0c0c0b;border:1px solid #2a2a27;border-radius:20px">
+<h3 style="font-size:32px;font-weight:600">Community partner</h3>
+<p style="font-size:24px;font-weight:600;color:#d4fb08">In kind</p>
+<ul style="font-size:24px;line-height:1.4;color:#a8a8a2">
+<li>Your café or shop hosts a game night</li>
+<li>QR posters at your door</li>
+<li>Shout-outs on live nights</li>
+</ul>
+</div>
+</div>
+</section>
+<section class="slide" aria-label="Slide 10" id="safety" data-transition="fade" style="background:#0c0c0b;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">Our rules</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px">Safe for the street, safe for your brand</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:28px 64px">
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">Permission from the syndic and neighbours first</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">An informal check with the municipality</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">Brightness capped in the firmware</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">Switches itself off at 23:00</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">No strobing or fast flashing</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">Every message moderated: nothing political, religious or insulting</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">Low voltage outside only, fused by section</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">Frame fixings tested for wind</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">Kids on camera only with a parent’s OK</p></div>
+<div style="display:flex;gap:20px;align-items:start"><svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="flex:none"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#d4fb08" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="font-size:32px;line-height:1.3">Only verified claims on camera</p></div>
+</div>
+</section>
+<section class="slide" aria-label="Slide 11" id="team" data-transition="fade" style="background:#0c0c0b;color:#f2f2ee;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">The team</p>
+<h2 style="font-size:72px;font-weight:500;line-height:1.05;letter-spacing:-2px;width:1400px">Three engineers who run playful experiments in the real city</h2>
+</div>
+<div style="display:flex;gap:16px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:40px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">Platform and build</p>
+<h3 style="font-size:44px;font-weight:500;letter-spacing:-1px">[Name]</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">The wall’s hardware: LEDs, power, the ESP32 and the frame.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:40px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">AI and experiments</p>
+<h3 style="font-size:44px;font-weight:500;letter-spacing:-1px">[Name]</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">The game, the phone controller and the Derja moderation filter.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:40px;background:#161614;border:1px solid #2a2a27;border-radius:20px">
+<p style="font-size:24px;font-weight:600;color:#d4fb08">Brand and content</p>
+<h3 style="font-size:44px;font-weight:500;letter-spacing:-1px">[Name]</h3>
+<p style="font-size:24px;line-height:1.4;color:#a8a8a2">Filming, editing, posting, partnerships and the neighbours.</p>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#a8a8a2;width:1400px">The wall is our first big season. It leads to a café-lab where people come for coffee and play with the experiments themselves.</p>
+</section>
+<section class="slide" aria-label="Slide 12" id="ask" data-transition="fade" style="background:#d4fb08;color:#0c0c0b;font-family:'Urbanist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<p style="font-size:24px;font-weight:600;color:#3a4200">The ask</p>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-size:120px;font-weight:500;line-height:0.95;letter-spacing:-5px;color:#0c0c0b;width:1300px">Help us light up 512 bottles</h1>
+<p style="font-size:44px;line-height:1.25;color:#1a1d00;width:1400px">We’re looking for [__] partners and [TND __] to build the full wall this winter.</p>
+</div>
+<div style="display:flex;gap:64px;align-items:end">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;color:#3a4200">Talk to us</p>
+<p style="font-size:32px;font-weight:600">[Name] · [phone] · [email]</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;color:#3a4200">Play the prototype</p>
+<p style="font-size:32px;font-weight:600"><a href="https://kami-abdou.github.io/bottle-wall/">kami-abdou.github.io/bottle-wall</a></p>
+</div>
+</div>
+</section>
+</div>
+</main>
+<nav class="bar" aria-label="Slide controls">
+  <button type="button" id="prev" aria-label="Previous slide">←</button>
+  <button type="button" id="next" aria-label="Next slide">→</button>
+  <span class="count" id="count" aria-live="polite"></span>
+  <span class="spacer"></span>
+  <button type="button" id="full">Full screen</button>
+</nav>
+<script>
+(function () {
+  "use strict";
+  var deck = document.getElementById("deck");
+  var slides = Array.prototype.slice.call(deck.querySelectorAll(".slide"));
+  var n = slides.length, cur = 0;
+  function fit() {
+    var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    deck.style.transform = "translate(-50%, -50%) scale(" + s + ")";
+  }
+  function show(i, push) {
+    cur = Math.max(0, Math.min(n - 1, i));
+    slides.forEach(function (el, k) { el.classList.toggle("is-current", k === cur); el.setAttribute("aria-hidden", k === cur ? "false" : "true"); });
+    document.getElementById("count").textContent = (cur + 1) + " / " + n;
+    document.getElementById("progress").style.width = ((cur + 1) / n * 100) + "%";
+    if (push !== false) history.replaceState(null, "", "#" + (cur + 1));
+  }
+  function go(d) { show(cur + d); }
+  document.getElementById("prev").onclick = function () { go(-1); };
+  document.getElementById("next").onclick = function () { go(1); };
+  document.getElementById("full").onclick = function () {
+    if (document.fullscreenElement) document.exitFullscreen(); else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+  };
+  document.addEventListener("keydown", function (e) {
+    if (e.target.closest && e.target.closest("button") && (e.key === " " || e.key === "Enter")) return;
+    if (["ArrowRight", "PageDown", " ", "Enter"].indexOf(e.key) >= 0) { e.preventDefault(); go(1); }
+    else if (["ArrowLeft", "PageUp", "Backspace"].indexOf(e.key) >= 0) { e.preventDefault(); go(-1); }
+    else if (e.key === "Home") show(0); else if (e.key === "End") show(n - 1);
+    else if (e.key === "f" || e.key === "F") document.getElementById("full").click();
+  });
+  document.getElementById("stage").addEventListener("click", function (e) {
+    if (e.target.closest("a")) return;
+    go(e.clientX > window.innerWidth / 3 ? 1 : -1);
+  });
+  var x0 = null;
+  document.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener("touchend", function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+  });
+  window.addEventListener("resize", fit);
+  fit();
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1, false);
+})();
+</script>
+</body>
+</html>
